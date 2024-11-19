@@ -1,4 +1,6 @@
 module.exports = function (str) {
-    // 処理
+    for (let i = 0; i < 1; i++) {
+        console.log(str);
+    }
     return str.split('').reverse().join('');
-  };
+};
