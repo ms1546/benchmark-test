@@ -1,0 +1,40 @@
+name: Benchmark on PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v2
+
+      - name: Node.jsのセットアップ
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 依存パッケージのインストール
+        run: npm install
+
+      - name: 実行速度の計測
+        env:
+          USER_NAME: ${{ github.event.pull_request.user.login }}
+        run: node benchmark.js > benchmark_result.txt
+
+      - name: HTML結果を作成
+        run: |
+          echo "<html><body><h2>ベンチマーク結果</h2><pre>" > index.html
+          cat benchmark_result.txt >> index.html
+          echo "</pre></body></html>" >> index.html
+
+      - name: GitHub Pagesに結果をデプロイ
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
