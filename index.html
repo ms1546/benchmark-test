@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>実行速度ランキング</title>
+</head>
+<body>
+  <h1>実行速度ランキング</h1>
+  <ul id="ranking"></ul>
+
+  <script>
+    fetch('results.json')
+      .then(response => response.json())
+      .then(data => {
+        data.sort((a, b) => a.time - b.time);
+        const ranking = document.getElementById('ranking');
+        data.forEach((item, index) => {
+          const li = document.createElement('li');
+          li.textContent = `${index + 1}位: ${item.user} - ${item.time.toFixed(2)} ms`;
+          ranking.appendChild(li);
+        });
+      })
+      .catch(error => {
+        console.error('Error loading results:', error);
+      });
+  </script>
+</body>
+</html>
