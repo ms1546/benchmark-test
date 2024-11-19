@@ -19,15 +19,17 @@ jobs:
           node-version: '18'
 
       - name: 依存パッケージのインストール
-        run: npm install
+        run: |
+          npm install
+          npm install benchmark
 
       - name: 実行速度の計測
         env:
           USER_NAME: ${{ github.event.pull_request.user.login }}
         run: node benchmark.js
 
-      - name: HTML結果を作成
-        run: cp results.json index.html .
+      - name: デプロイ用ファイルの確認
+        run: ls -al
 
       - name: GitHub Pagesに結果をデプロイ
         uses: peaceiris/actions-gh-pages@v3
