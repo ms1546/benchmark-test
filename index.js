@@ -1,5 +1,6 @@
-module.exports = async function (str) {
-    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    await wait(10000);
+module.exports = function (str) {
+    for (let i = 0; i < 100; i++) {
+        console.log(str);
+    }
     return str.split('').reverse().join('');
 };
