@@ -24,13 +24,10 @@ jobs:
       - name: 実行速度の計測
         env:
           USER_NAME: ${{ github.event.pull_request.user.login }}
-        run: node benchmark.js > benchmark_result.txt
+        run: node benchmark.js
 
       - name: HTML結果を作成
-        run: |
-          echo "<html><body><h2>ベンチマーク結果</h2><pre>" > index.html
-          cat benchmark_result.txt >> index.html
-          echo "</pre></body></html>" >> index.html
+        run: cp results.json index.html .
 
       - name: GitHub Pagesに結果をデプロイ
         uses: peaceiris/actions-gh-pages@v3
