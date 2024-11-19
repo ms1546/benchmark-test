@@ -1,4 +1,2 @@
-<html><body><h2>ベンチマーク結果</h2><pre>
 ms1546の処理 x 7.56 ops/sec ±3.58% (25 runs sampled)
 ms1546の実行速度: 132.22ミリ秒
-</pre></body></html>
