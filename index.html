@@ -6,18 +6,27 @@
 </head>
 <body>
   <h1>実行速度ランキング</h1>
-  <ul id="ranking"></ul>
+  <div id="ranking"></div>
 
   <script>
     fetch('results.json')
       .then(response => response.json())
       .then(data => {
-        data.sort((a, b) => a.time - b.time);
-        const ranking = document.getElementById('ranking');
-        data.forEach((item, index) => {
-          const li = document.createElement('li');
-          li.textContent = `${index + 1}位: ${item.user} - ${item.time.toFixed(2)} ms`;
-          ranking.appendChild(li);
+        const rankingDiv = document.getElementById('ranking');
+        Object.keys(data).forEach(branch => {
+          const branchHeading = document.createElement('h2');
+          branchHeading.textContent = `ブランチ: ${branch}`;
+          rankingDiv.appendChild(branchHeading);
+
+          const ul = document.createElement('ul');
+          data[branch]
+            .sort((a, b) => a.time - b.time)
+            .forEach((item, index) => {
+              const li = document.createElement('li');
+              li.textContent = `${index + 1}位: ${item.user} - ${item.time.toFixed(2)} ms`;
+              ul.appendChild(li);
+            });
+          rankingDiv.appendChild(ul);
         });
       })
       .catch(error => {

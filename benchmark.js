@@ -5,6 +5,7 @@ const fn = require('./index');
 const longString = 'test'.repeat(1000000);
 
 const userName = process.env.USER_NAME || 'anonymous';
+const branchName = process.env.GITHUB_HEAD_REF || 'unknown-branch';
 
 const suite = new Benchmark.Suite();
 suite
@@ -14,16 +15,20 @@ suite
   .on('complete', function () {
     const executionTime = (1 / this[0].hz) * 1000;
 
-    let results = [];
+    let results = {};
     try {
       results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
     } catch (error) {
       console.log('No existing results, creating new one.');
     }
 
-    results.push({ user: userName, time: executionTime });
+    if (!results[branchName]) {
+      results[branchName] = [];
+    }
+
+    results[branchName].push({ user: userName, time: executionTime });
     fs.writeFileSync('results.json', JSON.stringify(results, null, 2));
 
-    console.log(`${userName}の実行速度: ${executionTime.toFixed(2)} ms`);
+    console.log(`${userName}の実行速度: ${executionTime.toFixed(2)} ms (ブランチ: ${branchName})`);
   })
   .run({ async: true });
