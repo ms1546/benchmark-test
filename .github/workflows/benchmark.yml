@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0s
 
       - name: mainブランチの変更を取り込む
         run: |
