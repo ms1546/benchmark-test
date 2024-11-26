@@ -15,11 +15,6 @@ jobs:
         with:
           fetch-depth: 0s
 
-      - name: mainブランチの変更を取り込む
-        run: |
-          git fetch origin main
-          git merge origin/main
-
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v3
         with:
