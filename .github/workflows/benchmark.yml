@@ -26,6 +26,7 @@ jobs:
       - name: 実行速度の計測
         env:
           USER_NAME: ${{ github.event.pull_request.user.login }}
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: node benchmark.js
 
       - name: デプロイ用ファイルの確認
