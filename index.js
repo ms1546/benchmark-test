@@ -1,5 +1,5 @@
 module.exports = function (str) {
-    console.log('test');
-    
+    // 処理
+
     return str.split('').reverse().join('');
-};
+  };
