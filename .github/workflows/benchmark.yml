@@ -13,10 +13,24 @@ jobs:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v2
 
+      - name: mainブランチの変更を取り込む
+        run: |
+          git fetch origin main
+          git merge origin/main
+
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+      - name: 既存のresults.jsonを取得
+        run: |
+          if [ -f results.json ]; then
+            echo "Existing results.json found, copying..."
+          else
+            echo "No existing results.json, creating a new one."
+            echo '{}' > results.json
+          fi
 
       - name: 依存パッケージのインストール
         run: |
@@ -28,9 +42,6 @@ jobs:
           USER_NAME: ${{ github.event.pull_request.user.login }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: node benchmark.js
-
-      - name: デプロイ用ファイルの確認
-        run: ls -al
 
       - name: GitHub Pagesに結果をデプロイ
         uses: peaceiris/actions-gh-pages@v3
