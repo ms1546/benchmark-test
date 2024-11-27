@@ -17,7 +17,9 @@ suite
 
     let results = {};
     try {
-      results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+      if (fs.existsSync('results.json')) {
+        results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+      }
     } catch (error) {
       console.log('No existing results, creating new one.');
     }

@@ -13,7 +13,7 @@ jobs:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0s
+          fetch-depth: 0
 
       - name: mainブランチの変更を取り込む
         run: |
@@ -30,7 +30,6 @@ jobs:
           if [ -f results.json ]; then
             echo "Existing results.json found, copying..."
           else
-            echo "No existing results.json, creating a new one."
             echo '{}' > results.json
           fi
 
@@ -44,6 +43,16 @@ jobs:
           USER_NAME: ${{ github.event.pull_request.user.login }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: node benchmark.js
+
+      - name: 既存のresults.jsonを保持
+        run: |
+          if [ -f results.json ]; then
+            cp results.json results_backup.json
+          fi
+
+      - name: 統合されたresults.jsonを確認
+        run: |
+          cat results.json
 
       - name: GitHub Pagesに結果をデプロイ
         uses: peaceiris/actions-gh-pages@v3
