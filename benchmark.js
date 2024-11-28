@@ -21,7 +21,7 @@ suite
         results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
       }
     } catch (error) {
-      console.log('No existing results, creating new one.');
+      console.error('No existing results.json found. Creating a new one.');
     }
 
     if (!results[branchName]) {
