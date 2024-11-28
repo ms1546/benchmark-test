@@ -2,10 +2,10 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>実行速度ランキング</title>
+  <title>複数ブランチのベンチマーク結果</title>
 </head>
 <body>
-  <h1>実行速度ランキング</h1>
+  <h1>ベンチマーク結果</h1>
   <div id="ranking"></div>
 
   <script>
@@ -29,9 +29,7 @@
           rankingDiv.appendChild(ul);
         });
       })
-      .catch(error => {
-        console.error('Error loading results:', error);
-      });
+      .catch(error => console.error('Error loading results:', error));
   </script>
 </body>
 </html>

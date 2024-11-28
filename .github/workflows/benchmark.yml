@@ -1,4 +1,4 @@
-name: Benchmark on PR
+name: Deploy Benchmark Results to Pages
 
 on:
   pull_request:
@@ -12,52 +12,35 @@ jobs:
     steps:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: mainブランチの変更を取り込む
-        run: |
-          git fetch origin main
-          git merge origin/main
 
       - name: Node.jsのセットアップ
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: 既存のresults.jsonを取得
-        run: |
-          if [ -f results.json ]; then
-            echo "Existing results.json found, copying..."
-          else
-            echo '{}' > results.json
-          fi
-
       - name: 依存パッケージのインストール
-        run: |
-          npm install
-          npm install benchmark
+        run: npm install
 
-      - name: 実行速度の計測
+      - name: ベンチマークを実行
         env:
           USER_NAME: ${{ github.event.pull_request.user.login }}
           GITHUB_HEAD_REF: ${{ github.head_ref }}
         run: node benchmark.js
 
-      - name: 既存のresults.jsonを保持
+      - name: 既存のresults.jsonをダウンロード
         run: |
           if [ -f results.json ]; then
-            cp results.json results_backup.json
+            echo "Using existing results.json"
+          else
+            echo '{}' > results.json
           fi
 
-      - name: 統合されたresults.jsonを確認
-        run: |
-          cat results.json
+      - name: results.jsonの統合
+        run: node merge-results.js
 
-      - name: GitHub Pagesに結果をデプロイ
+      - name: 結果をGitHub Pagesにデプロイ
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
-          keep_files: true
