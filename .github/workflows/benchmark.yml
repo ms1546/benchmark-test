@@ -1,46 +1,42 @@
-name: Deploy Benchmark Results to Pages
+name: Benchmark and Upload
 
 on:
   pull_request:
     branches:
-      - main
+      - '**'
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
 
     steps:
-      - name: リポジトリをチェックアウト
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Node.jsのセットアップ
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: '20'
 
-      - name: 依存パッケージのインストール
+      - name: Install dependencies
         run: npm install
 
-      - name: ベンチマークを実行
+      - name: Run benchmark
         env:
-          USER_NAME: ${{ github.event.pull_request.user.login }}
-          GITHUB_HEAD_REF: ${{ github.head_ref }}
+          USER_NAME: ${{ github.actor }}
+          GITHUB_REF_NAME: ${{ github.head_ref }}
         run: node benchmark.js
 
-      - name: 既存のresults.jsonをダウンロード
+      - name: Generate ranking page
+        run: node generateRankingPage.js
+
+      - name: Upload results to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
-          if [ -f results.json ]; then
-            echo "Using existing results.json"
-          else
-            echo '{}' > results.json
-          fi
-
-      - name: results.jsonの統合
-        run: node merge-results.js
-
-      - name: 結果をGitHub Pagesにデプロイ
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
-          publish_branch: gh-pages
+          aws s3 cp results.json s3://${{ secrets.S3_BUCKET_NAME }}/results.json
+          aws s3 cp ranking.html s3://${{ secrets.S3_BUCKET_NAME }}/ranking.html \
+            --content-type text/html
