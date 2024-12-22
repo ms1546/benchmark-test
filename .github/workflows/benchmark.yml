@@ -29,19 +29,14 @@ jobs:
         env:
           USER_NAME: ${{ github.actor }}
           GITHUB_REF_NAME: ${{ github.head_ref }}
-        run: node benchmark.js
+        run: |
+            node benchmark.js > result.json
 
-      - name: Generate ranking page
-        run: node generateRankingPage.js
-
-      - name: Upload results to S3
-        if: success()
+      - name: Upload benchmark result
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
-          aws s3 cp results.json s3://${{ secrets.S3_BUCKET_NAME }}/results.json
-          aws s3 cp ranking.html s3://${{ secrets.S3_BUCKET_NAME }}/ranking.html \
-            --content-type text/html
+          aws dynamodb put-item \
+            --table-name Benchmarks \
+            --item file://result.json
