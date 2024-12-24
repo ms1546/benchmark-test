@@ -18,55 +18,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Run benchmark
-        id: benchmark
-        run: |
-          node benchmark.js > result.json
+        run: npm install aws-sdk
 
       - name: Save result to DynamoDB
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-        run: |
-          node <<EOF
-          const AWS = require('aws-sdk');
-          const fs = require('fs');
-
-          // DynamoDB クライアント設定
-          const dynamoDb = new AWS.DynamoDB.DocumentClient({
-            region: process.env.AWS_REGION
-          });
-
-          (async () => {
-            try {
-              // GitHubイベント情報を読み込み
-              const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
-              const branch = githubEvent.pull_request.head.ref;
-
-              // 実行結果を読み込み
-              const result = JSON.parse(fs.readFileSync('result.json', 'utf8'));
-
-              // DynamoDB に保存するデータ
-              const params = {
-                TableName: 'Benchmarks',
-                Item: {
-                  branch: result.branch,
-                  timestamp: result.timestamp,
-                  executionTime: result.executionTime
-                }
-              };
-
-              // データ保存
-              console.log('Saving data to DynamoDB:', params.Item);
-              await dynamoDb.put(params).promise();
-              console.log('Data saved successfully to DynamoDB.');
-
-            } catch (error) {
-              console.error('Error saving data to DynamoDB:', error);
-              process.exit(1);
-            }
-          })();
-          EOF
+        run: node scripts/saveToDynamoDB.js
