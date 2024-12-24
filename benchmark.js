@@ -17,14 +17,12 @@ suite
 
     const result = {
       branch: branchName,
-      time: executionTime,
+      executionTime: executionTime,
       timestamp: timestamp,
     };
 
     fs.writeFileSync('result.json', JSON.stringify(result, null, 2));
 
-    console.log(
-      `ブランチ: ${branchName} の実行速度: ${executionTime.toFixed(2)} ms, タイムスタンプ: ${timestamp}`
-    );
+    console.log(`Result saved to result.json:`, result);
   })
   .run({ async: true });
