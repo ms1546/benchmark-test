@@ -9,11 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # リポジトリをクローン
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Node.js 環境のセットアップ
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
