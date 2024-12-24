@@ -40,30 +40,33 @@ jobs:
             region: process.env.AWS_REGION
           });
 
-          // GitHubイベント情報を読み込み
-          const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
-          const branch = githubEvent.pull_request.head.ref;
+          (async () => {
+            try {
+              // GitHubイベント情報を読み込み
+              const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+              const branch = githubEvent.pull_request.head.ref;
 
-          // 実行結果を読み込み
-          const result = JSON.parse(fs.readFileSync('result.json', 'utf8'));
+              // 実行結果を読み込み
+              const result = JSON.parse(fs.readFileSync('result.json', 'utf8'));
 
-          // DynamoDB に保存するデータ
-          const params = {
-            TableName: 'Benchmarks',
-            Item: {
-              branch: branch,
-              timestamp: new Date().toISOString(),
-              executionTime: result.executionTime
-            }
-          };
+              // DynamoDB に保存するデータ
+              const params = {
+                TableName: 'Benchmarks',
+                Item: {
+                  branch: result.branch,
+                  timestamp: result.timestamp,
+                  executionTime: result.executionTime
+                }
+              };
 
-          // データ保存
-          dynamoDb.put(params, (err) => {
-            if (err) {
-              console.error('DynamoDB Error:', err);
+              // データ保存
+              console.log('Saving data to DynamoDB:', params.Item);
+              await dynamoDb.put(params).promise();
+              console.log('Data saved successfully to DynamoDB.');
+
+            } catch (error) {
+              console.error('Error saving data to DynamoDB:', error);
               process.exit(1);
-            } else {
-              console.log('Data saved to DynamoDB:', params.Item);
             }
-          });
+          })();
           EOF
