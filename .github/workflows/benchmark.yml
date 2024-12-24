@@ -1,19 +1,20 @@
-name: Benchmark and Upload
+name: Save Benchmark Results
 
 on:
   pull_request:
-    branches:
-      - '**'
+    types: [opened, synchronize]
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
 
     steps:
+      # リポジトリをクローン
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      # Node.js 環境のセットアップ
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
@@ -21,22 +22,50 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
-
       - name: Run benchmark
-        if: success()
-        env:
-          USER_NAME: ${{ github.actor }}
-          GITHUB_REF_NAME: ${{ github.head_ref }}
+        id: benchmark
         run: |
-            node benchmark.js > result.json
+          node benchmark.js > result.json
 
-      - name: Upload benchmark result
+      - name: Save result to DynamoDB
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
-          aws dynamodb put-item \
-            --table-name Benchmarks \
-            --item file://result.json
+          node <<EOF
+          const AWS = require('aws-sdk');
+          const fs = require('fs');
+
+          // DynamoDB クライアント設定
+          const dynamoDb = new AWS.DynamoDB.DocumentClient({
+            region: process.env.AWS_REGION
+          });
+
+          // GitHubイベント情報を読み込み
+          const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          const branch = githubEvent.pull_request.head.ref;
+
+          // 実行結果を読み込み
+          const result = JSON.parse(fs.readFileSync('result.json', 'utf8'));
+
+          // DynamoDB に保存するデータ
+          const params = {
+            TableName: 'Benchmarks',
+            Item: {
+              branch: branch,
+              timestamp: new Date().toISOString(),
+              executionTime: result.executionTime
+            }
+          };
+
+          // データ保存
+          dynamoDb.put(params, (err) => {
+            if (err) {
+              console.error('DynamoDB Error:', err);
+              process.exit(1);
+            } else {
+              console.log('Data saved to DynamoDB:', params.Item);
+            }
+          });
+          EOF
