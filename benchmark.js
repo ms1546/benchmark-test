@@ -4,33 +4,27 @@ const fn = require('./index');
 
 const longString = 'test'.repeat(1000000);
 
-const userName = process.env.USER_NAME || 'anonymous';
 const branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'unknown-branch';
 
 const suite = new Benchmark.Suite();
 suite
-  .add(userName, () => {
+  .add('Benchmark Test', () => {
     fn(longString);
   })
   .on('complete', function () {
     const executionTime = (1 / this[0].hz) * 1000;
+    const timestamp = new Date().toISOString();
 
-    let results = {};
-    try {
-      if (fs.existsSync('results.json')) {
-        results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
-      }
-    } catch (error) {
-      console.error('No existing results.json found. Creating a new one.');
-    }
+    const result = {
+      branch: branchName,
+      time: executionTime,
+      timestamp: timestamp,
+    };
 
-    if (!results[branchName]) {
-      results[branchName] = [];
-    }
-    results[branchName].push({ user: userName, time: executionTime });
+    fs.writeFileSync('result.json', JSON.stringify(result, null, 2));
 
-    fs.writeFileSync('results.json', JSON.stringify(results, null, 2));
-
-    console.log(`${userName}の実行速度: ${executionTime.toFixed(2)} ms (ブランチ: ${branchName})`);
+    console.log(
+      `ブランチ: ${branchName} の実行速度: ${executionTime.toFixed(2)} ms, タイムスタンプ: ${timestamp}`
+    );
   })
   .run({ async: true });
