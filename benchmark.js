@@ -4,8 +4,6 @@ const fn = require('./index');
 
 const longString = 'test'.repeat(1000000);
 
-const branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'unknown-branch';
-
 const suite = new Benchmark.Suite();
 suite
   .add('Benchmark Test', () => {
@@ -16,7 +14,6 @@ suite
     const timestamp = new Date().toISOString();
 
     const result = {
-      branch: branchName,
       executionTime: executionTime,
       timestamp: timestamp,
     };
