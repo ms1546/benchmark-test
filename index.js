@@ -1,7 +1,8 @@
 module.exports = function (str) {
     // 処理
-    setTimeout(() => {
-        console.log('aaa');
-    }, 5000);
+    while (i < 5) {
+      console.log(i);
+      i++;
+    }
     return str.split('').reverse().join('');
 };
