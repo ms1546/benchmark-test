@@ -10,8 +10,12 @@ const fs = require('fs');
     const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
     const branch = githubEvent.pull_request.head.ref;
 
+    const commitHash = process.env.GITHUB_SHA;
+
     const rawResult = fs.readFileSync('result.json', 'utf8');
-    console.log('Raw result.json content:', rawResult); // デバッグ用
+    if (!rawResult.trim()) {
+      throw new Error('result.json is empty.');
+    }
     const result = JSON.parse(rawResult);
 
     const params = {
@@ -20,6 +24,7 @@ const fs = require('fs');
         branch: result.branch,
         timestamp: result.timestamp,
         executionTime: result.executionTime,
+        commitHash: commitHash, 
       },
     };
 
