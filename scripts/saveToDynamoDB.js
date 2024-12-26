@@ -23,7 +23,7 @@ const fs = require('fs');
       Item: {
         branch: branchName,
         timestamp: result.timestamp,
-        executionTime: result.executionTime || '測定不能',
+        executionTime: result.executionTime || 0000,
         commitHash: commitHash, 
       },
     };
