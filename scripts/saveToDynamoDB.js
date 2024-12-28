@@ -7,8 +7,6 @@ const fs = require('fs');
       region: process.env.AWS_REGION,
     });
 
-    const githubEvent = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
-    const branch = githubEvent.pull_request.head.ref;
     const branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'unknown-branch';
     const commitHash = process.env.GITHUB_SHA;
 
