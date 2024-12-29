@@ -7,9 +7,6 @@ const fs = require('fs');
       region: process.env.AWS_REGION,
     });
 
-    const branchName = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'unknown-branch';
-    const commitHash = process.env.GITHUB_SHA;
-
     const rawResult = fs.readFileSync('result.json', 'utf8');
     if (!rawResult.trim()) {
       throw new Error('result.json is empty.');
@@ -18,12 +15,7 @@ const fs = require('fs');
 
     const params = {
       TableName: 'Benchmarks',
-      Item: {
-        branch: branchName,
-        timestamp: result.timestamp,
-        executionTime: result.executionTime || 0000,
-        commitHash: commitHash, 
-      },
+      Item: { ...result },
     };
 
     console.log('Saving data to DynamoDB:', params.Item);

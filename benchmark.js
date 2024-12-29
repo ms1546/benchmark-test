@@ -10,12 +10,16 @@ suite
     fn(longString);
   })
   .on('complete', function () {
-    const executionTime = (1 / this[0].hz) * 1000;
+    const executionTime = (1 / this[0].hz) * 1000 | 0;
     const timestamp = new Date().toISOString();
+    const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME || 'unknown-branch';
+    const commitHash = process.env.GITHUB_SHA;
 
     const result = {
-      executionTime: executionTime,
-      timestamp: timestamp,
+      branch,
+      executionTime,
+      timestamp,
+      commitHash,
     };
 
     fs.writeFileSync('result.json', JSON.stringify(result, null, 2));
